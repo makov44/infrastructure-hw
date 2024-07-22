@@ -1,0 +1,18 @@
+FROM python:3.9-slim
+
+# Install build dependencies
+RUN apt-get update && \
+    apt-get install -y gcc libffi-dev && \
+    apt-get clean
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY web_server.py .
+
+# Add a simple health check
+HEALTHCHECK CMD curl --fail http://localhost:8000 || exit 1
+
+CMD ["uvicorn", "web_server:app", "--host", "0.0.0.0", "--port", "8000"]
