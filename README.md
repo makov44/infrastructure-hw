@@ -54,33 +54,51 @@ minikube start
 
 #### 2. Build the Docker images:
 ```
-chmod +x build-images.sh
-./build-images.sh
+chmod +x scripts/build-images.sh
+./scripts/build-images.sh
 ```
 
 #### 3. Deploy the services:
 ```
-chmod +x deploy.sh
-./deploy.sh
+chmod +x scripts/deploy.sh
+./scripts/deploy.sh
 ```
 
 #### 4. Open the URL provided at the end of the deployment in your web browser to view the "Hello world" broadcasts.
 
 ## Project Structure
 
-- `broadcaster.py`: Service that broadcasts "Hello world" messages
-- `web_server.py`: Web server that displays the messages in real-time
-- `requirements.txt`: Python dependencies
-- Kubernetes configuration files (*.yaml)
-- Dockerfiles for each service
+project-root/
+│
+├── src/
+│   ├── broadcaster/
+│   │   └── broadcaster.py
+│   └── web_server/
+│       └── web_server.py
+│
+├── kubernetes/
+│   ├── broadcaster-deployment.yaml
+│   ├── web-server-deployment.yaml
+│   └── redis-deployment.yaml
+│
+├── docker/
+│   ├── Dockerfile.broadcaster
+│   └── Dockerfile.web-server
+│
+├── scripts/
+│   ├── build-images.sh
+│   └── deploy.sh
+│
+├── requirements.txt
+└── README.md
 
 ## Development
 
 To make changes to the services:
 
-1. Modify the Python files as needed
-2. Rebuild the Docker images (step 3 in Setup Instructions)
-3. Reapply the Kubernetes configurations (step 4 in Setup Instructions)
+1. Modify the Python files in the respective src/ subdirectories as needed
+2. Rebuild the Docker images by running ./scripts/build-images.sh
+3. Redeploy the services by running ./scripts/deploy.sh
 
 ## Troubleshooting
 

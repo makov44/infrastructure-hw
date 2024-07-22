@@ -17,17 +17,22 @@ check_image "web-server:latest"
 
 # Deploy Redis
 echo "Deploying Redis..."
-kubectl apply -f redis-deployment.yaml
+kubectl apply -f kubernetes/redis-deployment.yaml
 kubectl rollout status deployment/redis
 
 # Deploy broadcaster
 echo "Deploying broadcaster..."
-kubectl apply -f broadcaster-deployment.yaml
+kubectl apply -f kubernetes/broadcaster-deployment.yaml
 kubectl rollout status deployment/broadcaster
 
 # Deploy web-server
 echo "Deploying web-server..."
-kubectl apply -f web-server-deployment.yaml
+kubectl apply -f kubernetes/web-server-deployment.yaml
+kubectl rollout status deployment/web-server
+
+# Restart web-server deployment
+echo "Restarting web-server deployment..."
+kubectl rollout restart deployment web-server
 kubectl rollout status deployment/web-server
 
 echo "All services deployed successfully!"
