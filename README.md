@@ -92,15 +92,15 @@ To review logs for the services in this project:
 
 For the broadcaster service:
 ```
-bashCopykubectl logs $(kubectl get pods -l app=broadcaster -o name)
+kubectl logs $(kubectl get pods -l app=broadcaster -o name)
 ```
 
 For the web server service:
 ```
-bashCopykubectl logs $(kubectl get pods -l app=web-server -o name)
+kubectl logs $(kubectl get pods -l app=web-server -o name)
 ```
 
 For Redis:
 ```
-bashCopykubectl logs $(kubectl get pods -l app=redis -o name)
+kubectl logs $(kubectl get pods -l app=redis -o name)
 ```
