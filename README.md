@@ -38,6 +38,25 @@ The services are containerized using Docker and orchestrated with Kubernetes (vi
 - Minikube
 - kubectl
 
+### Installing Prerequisites on macOS
+
+#### 1. Install Docker
+```
+brew install --cask docker
+```
+
+After installation, launch Docker Desktop from your Applications folder.
+
+#### 2. Install Minikube
+```
+brew install minikube
+```
+
+#### 3. Install kubectl
+```
+brew install kubectl
+```
+
 ## Setup Instructions
 
 1. Start Minikube:
@@ -59,13 +78,6 @@ The services are containerized using Docker and orchestrated with Kubernetes (vi
 
 4. Open the URL provided at the end of the deployment in your web browser to view the "Hello world" broadcasts.
 
-## Development
-
-To make changes to the services:
-
-1. Modify the Python files in the respective src/ subdirectories as needed
-2. Rebuild the Docker images by running ./scripts/build-images.sh
-3. Redeploy the services by running ./scripts/deploy.sh
 
 ## Troubleshooting
 
@@ -74,3 +86,21 @@ If you encounter any issues, please check the following:
 - Ensure all prerequisites are installed and up-to-date
 - Verify that Minikube is running (`minikube status`)
 - Check the logs of the services (`kubectl logs <pod-name>`)
+
+## Logging
+To review logs for the services in this project:
+
+For the broadcaster service:
+```
+bashCopykubectl logs $(kubectl get pods -l app=broadcaster -o name)
+```
+
+For the web server service:
+```
+bashCopykubectl logs $(kubectl get pods -l app=web-server -o name)
+```
+
+For Redis:
+```
+bashCopykubectl logs $(kubectl get pods -l app=redis -o name)
+```
