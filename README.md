@@ -78,6 +78,23 @@ brew install kubectl
 
 4. Open the URL provided at the end of the deployment in your web browser to view the "Hello world" broadcasts.
 
+## Redis Pub/Sub Limitations
+
+While Redis pub/sub is a powerful and simple messaging solution, it's important to be aware of its limitations:
+
+1. **At-most-once delivery**: Redis pub/sub provides at-most-once message delivery. If a subscriber is disconnected, it will miss any messages published while it was offline.
+
+2. **No persistence**: Messages are not stored. If there are no subscribers when a message is published, that message is lost.
+
+3. **No acknowledgment**: There's no built-in acknowledgment mechanism. Publishers don't know if subscribers received the message.
+
+4. **Scalability concerns**: As the number of subscribers grows, message delivery time can increase.
+
+5. **No automatic recovery**: If a subscriber crashes, it won't automatically resubscribe when it comes back online.
+
+6. **No message queuing**: Unlike a message queue, pub/sub doesn't store messages for later delivery.
+
+For this simple "Hello World" application, these limitations are generally not a concern. However, for more complex applications or production environments, you might need to consider more robust messaging solutions or implement additional patterns on top of Redis pub/sub.
 
 ## Troubleshooting
 
