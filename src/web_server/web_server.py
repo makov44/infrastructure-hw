@@ -1,12 +1,12 @@
-from fastapi import FastAPI, WebSocket, Form
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 import redis
 import os
 import asyncio
 import logging
-import json
+from redis.exceptions import ConnectionError, TimeoutError
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
@@ -53,23 +53,54 @@ html = """
 async def get():    
     return HTMLResponse(html)
 
+MAX_RETRIES = 5
+RETRY_DELAY = 5  # seconds
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()    
-    r = redis.Redis(host=os.getenv('REDIS_HOST', 'localhost'), port=6379, db=0)
-    p = r.pubsub()
-    p.subscribe('hello_channel')
-    try:
-        while True:
-            message = p.get_message(timeout=1.0)
-            if message and message['type'] == 'message':
-                await websocket.send_text(f"Received: {message['data'].decode('utf-8')}")                
-            await asyncio.sleep(0.1)
-    except Exception as e:
-        logger.error(f"WebSocket error: {e}")
-    finally:
-        p.unsubscribe('hello_channel')
+    await websocket.accept()
+    
+    retries = 0
+    while retries < MAX_RETRIES:
+        try:
+            r = redis.Redis(host=os.getenv('REDIS_HOST', 'localhost'), port=6379, db=0)
+            r.ping()  # Test the connection
+            logger.info("Connected to Redis successfully")
+            
+            p = r.pubsub()
+            p.subscribe('hello_channel')
+            
+            try:
+                while True:
+                    message = p.get_message(timeout=1.0)
+                    if message and message['type'] == 'message':
+                        await websocket.send_text(f"Received: {message['data'].decode('utf-8')}")
+                    await asyncio.sleep(0.1)
+            except WebSocketDisconnect:
+                logger.info("WebSocket disconnected")
+                break
+            except Exception as e:
+                logger.error(f"WebSocket error: {e}")
+                break
+        
+        except (ConnectionError, TimeoutError) as e:
+            retries += 1
+            logger.error(f"Failed to connect to Redis (attempt {retries}/{MAX_RETRIES}): {e}")
+            if retries < MAX_RETRIES:
+                logger.info(f"Retrying in {RETRY_DELAY} seconds...")
+                await asyncio.sleep(RETRY_DELAY)
+            else:
+                logger.critical("Max retries reached. Closing WebSocket.")
+                await websocket.close(code=1011, reason="Redis connection failed")
+                break
+        except Exception as e:
+            logger.critical(f"An unexpected error occurred: {e}")
+            await websocket.close(code=1011, reason="Unexpected server error")
+            break
+        finally:
+            if 'p' in locals():
+                p.unsubscribe('hello_channel')
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="debug")
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")

@@ -30,11 +30,6 @@ echo "Deploying web-server..."
 kubectl apply -f kubernetes/web-server-deployment.yaml
 kubectl rollout status deployment/web-server
 
-# Restart web-server deployment
-echo "Restarting web-server deployment..."
-kubectl rollout restart deployment web-server
-kubectl rollout status deployment/web-server
-
 echo "All services deployed successfully!"
 
 # Get the URL for the web server
